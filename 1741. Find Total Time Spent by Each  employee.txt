@@ -1,0 +1,9 @@
+1741. Find Total Time Spent by Each Employee
+
+
+SELECT emp_id,
+       event_day AS day,
+       SUM(out_time - in_time) AS total_time
+FROM Employees
+GROUP BY emp_id, event_day
+ORDER BY emp_id, day;
