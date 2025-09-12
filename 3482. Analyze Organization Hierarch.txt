@@ -1,0 +1,35 @@
+3482. Analyze Organization Hierarchy
+
+
+WITH RECURSIVE hierarchy AS (
+    SELECT employee_id, employee_name, manager_id, salary, department,
+           1 as level
+    FROM employees
+    WHERE manager_id IS NULL
+
+    UNION ALL
+    
+    SELECT e.employee_id, e.employee_name, e.manager_id, e.salary, e.department, 
+           h.level + 1 as level
+    FROM employees e
+    JOIN hierarchy h ON e.manager_id = h.employee_id
+),
+manager_sub AS (
+    SELECT manager_id, employee_id as sub_id
+    FROM hierarchy
+    WHERE manager_id IS NOT NULL
+
+    UNION ALL
+
+    SELECT s.manager_id, e.employee_id as sub_id
+    FROM manager_sub s
+    JOIN employees e ON e.manager_id = s.sub_id
+)
+SELECT h.employee_id, h.employee_name, h.level,
+       COALESCE(COUNT(h2.employee_id), 0) as team_size,
+       h.salary + COALESCE(SUM(h2.salary), 0) as budget
+FROM hierarchy h
+LEFT JOIN manager_sub ms ON h.employee_id = ms.manager_id  
+LEFT JOIN hierarchy h2 ON ms.sub_id = h2.employee_id
+GROUP BY h.employee_id, h.employee_name, h.level, h.salary
+ORDER BY level, budget DESC, employee_name;
