@@ -1,0 +1,24 @@
+3564. Seasonal Sales Analysis
+
+
+with mua as(
+    select product_id, sale_date, quantity, price, case 
+            when month(sale_date) = 12 or month(sale_date) = 1 or month(sale_date) = 2 then 'Winter'
+            when month(sale_date) between 3 and 5 then 'Spring'
+            when month(sale_date) between 6 and 8 then 'Summer'
+            else 'Fall'
+        end as season
+        from sales
+), gia as(
+    select m.season, m.product_id, m.sale_date, sum(m.quantity) as total_quantity,sum(m.quantity*m.price) as total_revenue, p.category
+    from mua m join products p 
+    on m.product_id = p.product_id
+    GROUP BY m.season, p.category 
+), ranking as(
+    select season, category, total_quantity, total_revenue,
+    dense_rank() over(partition by season order by total_quantity desc,total_revenue DESC ) as hang from gia 
+
+)
+select season, category, total_quantity, total_revenue 
+from ranking where hang = 1
+order by field(season, 'Fall','Spring','Summer', 'Winter');
