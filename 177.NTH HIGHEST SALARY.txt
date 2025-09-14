@@ -1,0 +1,12 @@
+QN - NTH HIGHEST SALARY(LEETCODE 177)
+
+CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+BEGIN
+    SET N = N - 1;  -- Convert to 0-based indexing for OFFSET
+    RETURN (
+        SELECT DISTINCT salary
+        FROM Employee
+        ORDER BY salary DESC
+        LIMIT 1 OFFSET N
+    );
+END
